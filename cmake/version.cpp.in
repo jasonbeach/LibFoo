@@ -1,0 +1,35 @@
+#include "version.hpp"
+
+namespace version
+{
+
+std::string full()
+{
+  return "@LIB_VERSION@";
+}
+
+unsigned major()
+{
+  return @LIB_VERSION_MAJOR@;
+}
+
+unsigned minor()
+{
+  return @LIB_VERSION_MINOR@ +0; // the +0 is needed to protect against LIB_VERSION_MINOR being empty
+}
+
+unsigned patch()
+{
+  return @LIB_VERSION_PATCH@ +0;
+}
+
+unsigned tweak()
+{
+  return @LIB_VERSION_TWEAK@ +0;
+}
+
+std::string git_hash()
+{
+  return "@GitHash@";
+}
+} // namespace version

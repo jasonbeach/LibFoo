@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(foo VERSION 1.0.0 LANGUAGES CXX)
+project(FooLib VERSION 5.3.7.2 LANGUAGES CXX)
 
 #Make sure that custom modules like FindRapidJSON are found
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
@@ -11,15 +11,25 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 
 ##############################################
 
-add_library(foolib 
+add_library(FooLib 
   src/foo.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 
 #Add an alias so that library can be used inside the build tree, e.g. when testing
-add_library(FooLib::FooLib ALIAS foolib)
+add_library(FooLib::FooLib ALIAS FooLib)
+
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/version.cpp PROPERTIES GENERATED TRUE)
+
+add_custom_target(version_cpp
+    COMMAND ${CMAKE_COMMAND} -DLIB_VERSION=${PROJECT_VERSION} -DLIB_PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/git_info.cmake
+)
+
+# Force executable to be compiled after regeneration takes a place
+add_dependencies(FooLib version_cpp)
 
 #Set target properties
-target_include_directories(foolib
+target_include_directories(FooLib
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -27,7 +37,7 @@ target_include_directories(foolib
 #        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_features(foolib PRIVATE cxx_std_11)
+target_compile_features(FooLib PRIVATE cxx_std_11 cxx_raw_string_literals)
 
 # link dependencies
 #target_link_libraries(foolib
@@ -42,15 +52,12 @@ target_compile_features(foolib PRIVATE cxx_std_11)
 include(GNUInstallDirs)
 set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/foolib)
 
-install(TARGETS foolib EXPORT FooLibTargets
+install(TARGETS FooLib EXPORT FooLibTargets
  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDESDIR}
  )
-
-#This is required so that the exported target has the name FooLib and not FooLib
-set_target_properties(foolib PROPERTIES EXPORT_NAME FooLib)
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -58,7 +65,6 @@ install(EXPORT FooLibTargets
   FILE FooLibTargets.cmake
   NAMESPACE FooLib:: 
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foolib
-   
   )
 
 #Create a ConfigVersion.cmake file
@@ -102,29 +108,9 @@ install(FILES
 
 
 
-# find_package(Git QUIET)
 
-# if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-#   # Working off a git repo, using git versioning
 
-#   # Get version from last tag
-#   execute_process (
-#       COMMAND             "${GIT_EXECUTABLE}" describe --always# | sed -e "s:v::"
-#       WORKING_DIRECTORY   "${PROJECT_SOURCE_DIR}"
-#       OUTPUT_VARIABLE     NNG_PACKAGE_VERSION
-#       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-#   # If the sources have been changed locally, add -dirty to the version.
-#   execute_process (
-#       COMMAND             "${GIT_EXECUTABLE}" diff --quiet
-#       WORKING_DIRECTORY   "${PROJECT_SOURCE_DIR}"
-#       OUTPUT_FILE <diff file>
-#       RESULT_VARIABLE     res)
-#   if (res EQUAL 1)
-#       set (NNG_PACKAGE_VERSION "${NNG_PACKAGE_VERSION}-dirty")
-#   endif()
-
-# endif()
 
 
 
