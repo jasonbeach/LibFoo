@@ -13,20 +13,38 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
 
 add_library(FooLib 
   src/foo.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+#  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 
 #Add an alias so that library can be used inside the build tree, e.g. when testing
 add_library(FooLib::FooLib ALIAS FooLib)
 
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/version.cpp PROPERTIES GENERATED TRUE)
+#set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/version.cpp PROPERTIES GENERATED TRUE)
 
-add_custom_target(version_cpp
-    COMMAND ${CMAKE_COMMAND} -DLIB_VERSION=${PROJECT_VERSION} -DLIB_PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/git_info.cmake
-)
+include(${CMAKE_SOURCE_DIR}/cmake/GetGitRevisionDescription.cmake)
 
-# Force executable to be compiled after regeneration takes a place
-add_dependencies(FooLib version_cpp)
+get_git_head_revision(RS HSH)
+
+message(STATUS "refspec: ${RS} Hash: ${HSH}")
+
+
+git_describe(GIT_DES)
+message(STATUS "git describe: ${GIT_DES}")
+
+
+
+git_local_changes(LOCAL_CHANGES)
+message(STATUS "git local changes: ${LOCAL_CHANGES}")
+
+# #########################################
+# # Get git version / commit information
+# add_custom_target(version_cpp
+#     COMMAND ${CMAKE_COMMAND} -DLIB_VERSION=${PROJECT_VERSION} -DLIB_PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR} -P ${CMAKE_SOURCE_DIR}/cmake/git_info.cmake
+# )
+
+# # Force executable to be compiled after regeneration takes a place
+# add_dependencies(FooLib version_cpp)
+# #########################################
 
 #Set target properties
 target_include_directories(FooLib
