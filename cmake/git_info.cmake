@@ -29,13 +29,25 @@ if (GIT_FOUND AND EXISTS "${LIB_PROJECT_SOURCE_DIR}/.git")
       WORKING_DIRECTORY   "${LIB_PROJECT_SOURCE_DIR}"
       OUTPUT_VARIABLE     GitHash
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-  # If the sources have been changed locally, add -dirty to the version.
+  execute_process (
+      COMMAND             "${GIT_EXECUTABLE}" describe ${GitHash} #describe --always
+      WORKING_DIRECTORY   "${LIB_PROJECT_SOURCE_DIR}"
+      RESULT_VARIABLE     res
+      OUTPUT_VARIABLE     GitDes
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT res EQUAL 0)  
+    set(git_string ${GitHash})
+  else()
+    set(git_string ${GitDes})
+  endif()
+
+# If the sources have been changed locally, add -dirty to the version.
   execute_process (
       COMMAND             "${GIT_EXECUTABLE}" diff --quiet
       WORKING_DIRECTORY   "${LIB_PROJECT_SOURCE_DIR}"
       RESULT_VARIABLE     res)
   if (res EQUAL 1)
-      set (GitHash "${GitHash}-dirty")
+      set (git_string "${git_string}-dirty")
   endif()
 
 endif()

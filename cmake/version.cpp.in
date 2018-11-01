@@ -30,6 +30,6 @@ unsigned tweak()
 
 std::string git_hash()
 {
-  return "@GitHash@";
+  return "@git_string@";
 }
 } // namespace version
